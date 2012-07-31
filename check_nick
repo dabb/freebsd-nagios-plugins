@@ -1,0 +1,37 @@
+#!/usr/local/bin/python
+# Usage: check_nick server nick hostname
+# Example: check_nick irc.freenode.net ubotu irc/bot/ubotu
+#
+# Placed in the public domain
+
+import irclib, os, sys
+
+server, nick, host = sys.argv[1:]
+
+def whois(c, e):
+    c.whois([nick])
+
+def on_whois(c, e):
+    args = e.arguments()
+    if args[0] == nick and args[2] == host:
+	print "%s was found on %s" % (nick, host)
+        sys.exit(0)
+    else:
+        print "%s was taken over: %s" % (nick,str(args))
+        sys.exit(1)
+
+def on_nosuchnick(c, e):
+    print "%s is missing" % nick
+    sys.exit(2)
+
+def abort():
+    print "Can't connect to %s" % server
+    sys.exit(3)
+
+c = irclib.SimpleIRCClient()
+c.connect(server, 6667, 'nagios_%s' % os.getpid())
+c.ircobj.add_global_handler("endofmotd", whois, 0)
+c.ircobj.add_global_handler("whoisuser", on_whois, 0)
+c.ircobj.add_global_handler("nosuchnick", on_nosuchnick, 0)
+c.ircobj.execute_delayed(30, abort)
+c.start()

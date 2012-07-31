@@ -14,18 +14,18 @@ def whois(c, e):
 def on_whois(c, e):
     args = e.arguments()
     if args[0] == nick and args[2] == host:
-	print "%s was found on %s" % (nick, host)
+	print "NICK OK - %s!*@%s was found on %s" % (nick, host, server)
         sys.exit(0)
     else:
-        print "%s was taken over: %s" % (nick,str(args))
+        print "WARNING - Nick %s was compromised on %s: %s" % (nick, server, str(args))
         sys.exit(1)
 
 def on_nosuchnick(c, e):
-    print "%s is missing" % nick
+    print "CRITICAL - %s is missing on %s" % (nick, server)
     sys.exit(2)
 
 def abort():
-    print "Can't connect to %s" % server
+    print "CRITICAL - Can't connect to %s" % server
     sys.exit(3)
 
 c = irclib.SimpleIRCClient()
